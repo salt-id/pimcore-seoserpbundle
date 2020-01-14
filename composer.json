@@ -1,0 +1,30 @@
+{
+    "name": "saltid/pimcore-seoserpbundle",
+    "description": "SEO/SERP Bundle For Pimcore",
+    "type": "pimcore-bundle",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Yulius Ardian Febrianto",
+            "email": "yuliusardin@gmail.com"
+        }
+    ],
+    "require": {
+        "pimcore/pimcore": "^5.4.0 | ^6.3.0",
+        "saltid/pimcore-extensionmanagerbundle": "^v1.0.0-beta-0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "SaltId\\SeoSerpBundle\\" : "src/SeoSerpBundle/"
+        }
+    },
+    "extra": {
+        "pimcore": {
+            "bundles": [
+                "SaltId\\SeoSerpBundle\\SeoSerpBundle"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false
+}

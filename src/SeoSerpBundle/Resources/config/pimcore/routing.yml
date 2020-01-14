@@ -1,0 +1,5 @@
+seoserp:
+    resource: "@SeoSerpBundle/Controller/"
+    type:     annotation
+    prefix:   /saltid/seoserp
+
