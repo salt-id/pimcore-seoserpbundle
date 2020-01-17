@@ -14,6 +14,10 @@ use Pimcore\Extension\Bundle\Installer\MigrationInstaller;
 
 class Installer extends MigrationInstaller
 {
+    const TABLE_SEO = 'bundle_seoserp_seo';
+
+    const TABLE_SEO_RULE = 'bundle_seoserp_seo_rule';
+
     /**
      * Executes install migration. Used during installation for initial creation of database tables and other data
      * structures (e.g. pimcore classes). The version object is the version object which can be used to add raw SQL
@@ -26,7 +30,8 @@ class Installer extends MigrationInstaller
      */
     public function migrateInstall(Schema $schema, Version $version)
     {
-        // TODO: Implement migrateInstall() method.
+        $this->installSeoTable($schema, $version);
+        $this->installSeoRuleTable($schema, $version);
     }
 
     /**
@@ -37,6 +42,65 @@ class Installer extends MigrationInstaller
      */
     public function migrateUninstall(Schema $schema, Version $version)
     {
-        // TODO: Implement migrateUninstall() method.
+        $this->uninstallSeoTable($schema, $version);
+        $this->uninstallSeoRuleTable($schema, $version);
     }
+
+    private function installSeoTable(Schema $schema, Version $version)
+    {
+        $table = $schema->createTable(self::TABLE_SEO);
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true,
+        ]);
+        $table->addColumn('objectId', 'integer', []);
+        $table->addUniqueIndex(['objectId']);
+
+        $table->addColumn('data', 'text');
+        $table->setPrimaryKey(['id']);
+    }
+
+    private function uninstallSeoTable(Schema $schema, Version $version)
+    {
+        $schema->dropTable(self::TABLE_SEO);
+    }
+
+    private function installSeoRuleTable(Schema $schema, Version $version)
+    {
+        $table = $schema->createTable(self::TABLE_SEO_RULE);
+
+        $table->addColumn('id', 'integer', [
+            'autoincrement' => true,
+        ]);
+
+        $table->addColumn('name', 'string', [
+            'default' => ''
+        ]);
+
+        $table->addColumn('routeName', 'string', [
+            'notnull' => false
+        ]);
+        $table->addColumn('routeVariable', 'string', [
+            'notnull' => false
+        ]);
+        $table->addColumn('className', 'string', [
+            'notnull' => false
+        ]);
+        $table->addColumn('classField', 'string', [
+            'notnull' => false
+        ]);
+
+        $table->addColumn('active', 'smallint', [
+            'default' => 1,
+            'notnull' => false
+        ]);
+
+        $table->addUniqueIndex(['routeName', 'className']);
+        $table->setPrimaryKey(['id']);
+    }
+
+    private function uninstallSeoRuleTable(Schema $schema, Version $version)
+    {
+        $schema->dropTable(self::TABLE_SEO_RULE);
+    }
+
 }

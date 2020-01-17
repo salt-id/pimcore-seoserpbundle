@@ -23,6 +23,9 @@ services:
 #            - "plain_value"
 #            - "%parameter%"
 
+    # Adds Meta Data entries of document to HeadMeta view helper
+    SaltId\SeoSerpBundle\EventListener\DocumentMetaDataListener: ~
+
     SaltId\SeoSerpBundle\Installer:
         public: true
         arguments:
