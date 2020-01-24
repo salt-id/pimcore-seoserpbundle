@@ -84,9 +84,9 @@ class DocumentMetaDataListener implements EventSubscriberInterface
         $routeName = $request->get('_route');
         $getSeoRule = SeoRule::getByRouteName($routeName);
 
-        if ($getSeoRule) {
+        if ($getSeoRule && $getSeoRule->getActive()) {
             $getRouteVariable = $getSeoRule->getRouteVariable();
-            $getClassName = $getSeoRule->getClassName();
+            $getClassName = 'Pimcore\\Model\\DataObject\\' . $getSeoRule->getClassName();
             $getClassField = 'getBy' . ucfirst($getSeoRule->getClassField());
             $routeVariable = $request->get($getRouteVariable);
 

@@ -38,43 +38,155 @@ saltid.seoserp.seo.rule.item = Class.create({
                     value: this.data.name
                 },
                 {
-                    xtype: "textfield",
+                    xtype: "combo",
                     fieldLabel: t('routeName'),
                     name: "routeName",
+                    itemId: "routeName",
                     width: 350,
-                    value: this.data.routeName
+                    store: this.getRouteName(),
+                    valueField: "id",
+                    displayField: "name",
+                    fields: ['id', 'name'],
+                    mode: "local",
+                    triggerAction: "all",
+                    value: this.data.routeName,
+                    listeners: {
+                        afterrender: function(field,b,c) {
+                            if (field.initialValue !== null) {
+                                this.settingsForm.getComponent("routeVariable").setStore(this.getRouteVariable(field.initialValue));
+                            }
+                        }.bind(this),
+                        change: function(field, value) {
+                            this.settingsForm.getComponent("routeVariable").setStore(this.getRouteVariable(value));
+                        }.bind(this)
+                    }
                 },
                 {
-                    xtype: "textfield",
+                    xtype: "combo",
                     fieldLabel: t('routeVariable'),
                     name: "routeVariable",
+                    itemId: "routeVariable",
                     width: 350,
+                    valueField: "name",
+                    displayField: "name",
+                    fields: ['name'],
+                    mode: "local",
+                    triggerAction: "all",
                     value: this.data.routeVariable
                 },
                 {
-                    xtype: "textfield",
+                    xtype: "combo",
                     fieldLabel: t('className'),
                     name: "className",
+                    itemId: "className",
                     width: 350,
-                    value: this.data.className
+                    valueField: "name",
+                    displayField: "name",
+                    fields: ['name'],
+                    mode: "local",
+                    triggerAction: "all",
+                    value: this.data.className,
+                    store: this.getPimcoreClass(),
+                    listeners: {
+                        afterrender: function(field,b,c) {
+                            if (field.initialValue !== null) {
+                                this.settingsForm.getComponent("classField").setStore(this.getPimcoreClassFields(field.initialValue));
+                            }
+                        }.bind(this),
+                        change: function(field, value) {
+                            this.settingsForm.getComponent("classField").setStore(this.getPimcoreClassFields(value));
+                        }.bind(this)
+                    }
                 },
                 {
-                    xtype: "textfield",
-                    fieldLabel: t('classField'),
+                    xtype: "combo",
+                    fieldLabel: t("classField"),
                     name: "classField",
+                    itemId: "classField",
                     width: 350,
-                    value: this.data.classField
+                    valueField: "name",
+                    displayField: "name",
+                    fields: ['name'],
+                    mode: "local",
+                    triggerAction: "all",
+                    value: this.data.classField,
                 },
                 {
                     name: "active",
                     fieldLabel: t("active"),
                     xtype: "checkbox",
-                    checked: this.data["active"]
+                    checked: this.data.active
                 }
             ]
         });
 
         return this.settingsForm;
+    },
+
+    getRouteName: function() {
+        var routeNameStore = new Ext.data.Store({
+            autoDestroy: false,
+            autoLoad: true,
+            proxy: {
+                type: 'ajax',
+                url: '/saltid/seoserp/route/list',
+                reader: {
+                    type: 'json',
+                }
+            }
+        });
+
+        return routeNameStore;
+    },
+
+    getRouteVariable: function(routeId) {
+        var routeVariableStore = new Ext.data.Store({
+            autoDestroy: false,
+            autoLoad: true,
+            proxy: {
+                type: 'ajax',
+                url: '/saltid/seoserp/route/variables',
+                extraParams: { id: routeId },
+                reader: {
+                    type: 'json',
+                }
+            }
+        });
+
+        return routeVariableStore;
+    },
+
+    getPimcoreClass: function() {
+      var pimcoreClass = new Ext.data.Store({
+          autoDestroy: false,
+          autoLoad: true,
+          proxy: {
+              type: 'ajax',
+              url: '/saltid/seoserp/class/list',
+              reader: {
+                  type: 'json',
+              }
+          }
+      });
+
+      return pimcoreClass;
+    },
+
+    getPimcoreClassFields: function(pimcoreClassId) {
+        var pimcoreClassFields = new Ext.data.Store({
+            autoDestroy: false,
+            autoLoad: true,
+            proxy: {
+                type: 'ajax',
+                url: '/saltid/seoserp/class/fields',
+                extraParams: { id: pimcoreClassId },
+                reader: {
+                    type: 'json',
+                }
+            }
+        });
+
+        return pimcoreClassFields;
     },
 
     save: function () {
@@ -89,9 +201,17 @@ saltid.seoserp.seo.rule.item = Class.create({
                 id: this.data.id,
                 data: Ext.encode(saveData)
             },
-            success: function () {
+            success: function (response) {
+                res = Ext.decode(response.responseText);
+
+                if (res.success) {
+                    pimcore.helpers.showNotification(t("success"), res.message, "success");
+                }
+                if (!res.success) {
+                    pimcore.helpers.showNotification(t("warning"), res.message, "warning");
+                }
+
                 this.parent.getTree().getStore().load();
-                pimcore.helpers.showNotification(t("success"), t("saved_successfully"), "success");
             }.bind(this)
         });
     }

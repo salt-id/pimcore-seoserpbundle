@@ -8,6 +8,7 @@
 
 namespace SaltId\SeoSerpBundle\Controller;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Pimcore\Model\Staticroute;
 use SaltId\SeoSerpBundle\Model\SeoRule;
 use Symfony\Component\HttpFoundation\Request;
@@ -91,9 +92,19 @@ class SeoRuleController extends AbstractController
         /** @var SeoRule $seoRule */
         $seoRule = SeoRule::getById($request->get('id'));
         $seoRule->setValues($data['settings']);
-        $seoRule->save();
 
-        return $this->json(['success' => true], 200);
+        $success = false;
+        $message = null;
+        try {
+            $success = true;
+            $message = 'Saved successfully.';
+
+            $seoRule->save();
+        } catch (UniqueConstraintViolationException $uniqueConstraintViolationException) {
+            $message = 'Duplicate data ! Failed to save.';
+        }
+
+        return $this->json(['success' => $success, 'message' => $message], 200);
     }
 
     /**

@@ -9,9 +9,13 @@
 namespace SaltId\SeoSerpBundle\Model\SeoRule;
 
 use Pimcore\Model\Listing\AbstractListing;
+use SaltId\SeoSerpBundle\Traits\ArrayableDataObjectListing;
+use SaltId\SeoSerpBundle\Traits\CountableDataObjectListing;
 
 class Listing extends AbstractListing
 {
+    use ArrayableDataObjectListing, CountableDataObjectListing;
+
     /**
      * List of seoRule.
      *

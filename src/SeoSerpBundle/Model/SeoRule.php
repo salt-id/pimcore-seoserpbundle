@@ -9,9 +9,12 @@
 namespace SaltId\SeoSerpBundle\Model;
 
 use Pimcore\Model\AbstractModel;
+use SaltId\SeoSerpBundle\Traits\ArrayableDataObject;
 
 class SeoRule extends AbstractModel
 {
+    use ArrayableDataObject;
+
     /** @var integer $id */
     public $id;
 
@@ -161,7 +164,7 @@ class SeoRule extends AbstractModel
      */
     public function getActive()
     {
-        return $this->active;
+        return (bool) $this->active;
     }
 
     /**

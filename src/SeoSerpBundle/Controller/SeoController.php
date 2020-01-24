@@ -10,6 +10,7 @@ namespace SaltId\SeoSerpBundle\Controller;
 
 use Pimcore\Db;
 use Pimcore\Model\DataObject\ClassDefinition;
+use SaltId\SeoSerpBundle\Helper\GeneralHelper;
 use SaltId\SeoSerpBundle\Installer;
 use SaltId\SeoSerpBundle\Model\Seo;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,7 @@ class SeoController extends AbstractController
             '\SaltId\SeoSerpBundle\Traits\Seoable',
             explode(
                 ',',
-                preg_replace('/\s+/', '', $getClassDefinition->getUseTraits())),
+                GeneralHelper::removeSpace($getClassDefinition->getUseTraits())),
             false
         );
         $data = null;
