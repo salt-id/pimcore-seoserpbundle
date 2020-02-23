@@ -41,6 +41,8 @@ class SeoRuleController extends AbstractController
             }
         }
 
+        $res['metadata'] = json_decode($res['metadata'], true);
+
         return $this->json($res, 200);
     }
 
@@ -89,9 +91,33 @@ class SeoRuleController extends AbstractController
     {
         $data = json_decode($request->get('data'), true);
 
+        $settings = $data['settings'];
+        $metadata = [];
+
+        if ($settings) {
+            foreach ($settings as $key => $setting) {
+                $findMetaData = preg_match('/metadata/', $key, $matches);
+
+                if (!$findMetaData) {
+                    continue;
+                }
+
+                $split = preg_split('/\W+/', $key);
+
+                if (!$split) {
+                    continue;
+                }
+
+                $metadata[$split[0]][$split[1]][$split[2]] = $setting;
+                unset($settings[$key]);
+            }
+            $metadata = json_encode($metadata['metadata']);
+            $settings['metadata'] = $metadata;
+        }
+
         /** @var SeoRule $seoRule */
         $seoRule = SeoRule::getById($request->get('id'));
-        $seoRule->setValues($data['settings']);
+        $seoRule->setValues($settings);
 
         $success = false;
         $message = null;

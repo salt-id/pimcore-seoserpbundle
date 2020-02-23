@@ -93,6 +93,7 @@ class Installer extends MigrationInstaller
             'default' => 1,
             'notnull' => false
         ]);
+        $table->addColumn('metadata', 'text');
 
         $table->addUniqueIndex(['routeName', 'className']);
         $table->setPrimaryKey(['id']);

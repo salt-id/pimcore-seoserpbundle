@@ -123,15 +123,53 @@ class DocumentMetaDataListener implements EventSubscriberInterface
             }
 
             if (!$metadata) {
-                return;
+                $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
+
+                $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
+
+                if ($decodeDefaultMetaData) {
+                    foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
+                        $defaultContent = $decodeDefaultMetaDatum['content'];
+                        $defaultKeyValue = $decodeDefaultMetaDatum['keyValue'];
+                        $defaultKeyType = $decodeDefaultMetaDatum['keyType'];
+
+                        $contentAsGetter = 'get' . ucfirst($defaultContent);
+                        if (method_exists($object, $contentAsGetter)) {
+                            $defaultContent = $object->$contentAsGetter();
+                        }
+
+                        $this->headMeta->__invoke($defaultContent, $defaultKeyValue, $defaultKeyType, []);
+                    }
+                }
             }
 
-            foreach ($metadata as $metadatum) {
-                $content = $metadatum['content'];
-                $keyValue = $metadatum['keyValue'];
-                $keyType = $metadatum['keyType'];
+            if ($metadata) {
+                $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
 
-                $this->headMeta->__invoke($content, $keyValue, $keyType, []);
+                $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
+
+                if ($decodeDefaultMetaData) {
+                    foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
+                        $defaultContent = $decodeDefaultMetaDatum['content'];
+                        $defaultKeyValue = $decodeDefaultMetaDatum['keyValue'];
+                        $defaultKeyType = $decodeDefaultMetaDatum['keyType'];
+
+                        $contentAsGetter = 'get' . ucfirst($defaultContent);
+                        if (method_exists($object, $contentAsGetter)) {
+                            $defaultContent = $object->$contentAsGetter();
+                        }
+
+                        $this->headMeta->__invoke($defaultContent, $defaultKeyValue, $defaultKeyType, []);
+                    }
+                }
+
+                foreach ($metadata as $metadatum) {
+                    $content = $metadatum['content'];
+                    $keyValue = $metadatum['keyValue'];
+                    $keyType = $metadatum['keyType'];
+
+                    $this->headMeta->__invoke($content, $keyValue, $keyType, []);
+                }
             }
         }
     }

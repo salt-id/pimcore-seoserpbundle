@@ -36,6 +36,9 @@ class SeoRule extends AbstractModel
     /** @var boolean */
     public $active;
 
+    /** @var string $metadata */
+    public $metadata;
+
     public static function getById($id)
     {
         try {
@@ -173,5 +176,21 @@ class SeoRule extends AbstractModel
     public function setActive($active)
     {
         $this->active = $active;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
+     * @param mixed $metadata
+     */
+    public function setMetadata($metadata)
+    {
+        $this->metadata = $metadata;
     }
 }
