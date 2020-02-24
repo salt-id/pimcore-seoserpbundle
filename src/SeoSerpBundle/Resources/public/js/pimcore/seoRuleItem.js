@@ -50,7 +50,7 @@ saltid.seoserp.seo.rule.item = Class.create({
                         xtype: "textfield",
                         name: "metadata[" + count+ "][keyValue]",
                         value: value.keyValue,
-                        width: 200,
+                        width: 150,
                         emptyText: "Key Value",
                     },
                     {
@@ -59,7 +59,14 @@ saltid.seoserp.seo.rule.item = Class.create({
                         value: value.content,
                         width: 300,
                         emptyText: "Content Default",
-                    }
+                    },
+                    {
+                        xtype: "numberfield",
+                        name: "metadata[" + count + "][trim]",
+                        value: value.trim,
+                        width:100,
+                        emptyText: "Trim Character"
+                    },
                 ]
             });
 
@@ -76,21 +83,11 @@ saltid.seoserp.seo.rule.item = Class.create({
             this.metaDataPanel.updateLayout();
         }.bind(this);
 
-        try {
-            if(typeof this.data.metadata == "object" && this.data.metadata.length > 0) {
-                for(var r=0; r<this.data.metadata.length; r++) {
-                    addMetaData(this.data.metadata[r]);
-                }
-            }
-        } catch (e) {
-
-        }
-
         this.metaDataPanel = new Ext.form.FieldSet({
             title: t("meta"),
             collapsible: false,
             autoHeight:true,
-            width: 700,
+            width: '100%',
             style: "margin-top: 20px;",
             items: [{
                 xtype: "toolbar",
@@ -102,6 +99,16 @@ saltid.seoserp.seo.rule.item = Class.create({
                 }]
             }]
         });
+
+        try {
+            if(typeof this.data.metadata == "object" && this.data.metadata.length > 0) {
+                for(var r=0; r<this.data.metadata.length; r++) {
+                    addMetaData(this.data.metadata[r]);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
 
         this.settingsForm = new Ext.form.FormPanel({
             id: "pimcore_target_groups_panel_" + this.data.id,

@@ -13,6 +13,7 @@ use Pimcore\Http\Request\Resolver\{
     DocumentResolver as DocumentResolverService,
     PimcoreContextResolver
 };
+use SaltId\SeoSerpBundle\Helper\GeneralHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -101,6 +102,31 @@ class DocumentMetaDataListener implements EventSubscriberInterface
             $object = $obj->getObjects()[0];
             $objectId = $object->getId();
 
+            $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
+
+            $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
+
+            if ($decodeDefaultMetaData) {
+                foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
+                    $defaultContent = $decodeDefaultMetaDatum['content'];
+                    $defaultKeyValue = $decodeDefaultMetaDatum['keyValue'];
+                    $defaultKeyType = $decodeDefaultMetaDatum['keyType'];
+                    $trimString = $decodeDefaultMetaDatum['trim'];
+
+                    $contentAsGetter = 'get' . ucfirst($defaultContent);
+                    if (method_exists($object, $contentAsGetter)) {
+                        $defaultContent = $object->$contentAsGetter();
+                        $defaultContent = strip_tags($defaultContent);
+                    }
+
+                    if ($trimString) {
+                        $defaultContent = GeneralHelper::trimText($defaultContent, $trimString, false);
+                    }
+
+                    $this->headMeta->__invoke($defaultContent, $defaultKeyValue, $defaultKeyType, []);
+                }
+            }
+
             $seo = Seo::getByObjectId($objectId);
             if (!$seo) {
                 return;
@@ -123,53 +149,15 @@ class DocumentMetaDataListener implements EventSubscriberInterface
             }
 
             if (!$metadata) {
-                $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
-
-                $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
-
-                if ($decodeDefaultMetaData) {
-                    foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
-                        $defaultContent = $decodeDefaultMetaDatum['content'];
-                        $defaultKeyValue = $decodeDefaultMetaDatum['keyValue'];
-                        $defaultKeyType = $decodeDefaultMetaDatum['keyType'];
-
-                        $contentAsGetter = 'get' . ucfirst($defaultContent);
-                        if (method_exists($object, $contentAsGetter)) {
-                            $defaultContent = $object->$contentAsGetter();
-                        }
-
-                        $this->headMeta->__invoke($defaultContent, $defaultKeyValue, $defaultKeyType, []);
-                    }
-                }
+                return;
             }
 
-            if ($metadata) {
-                $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
+            foreach ($metadata as $metadatum) {
+                $content = $metadatum['content'];
+                $keyValue = $metadatum['keyValue'];
+                $keyType = $metadatum['keyType'];
 
-                $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
-
-                if ($decodeDefaultMetaData) {
-                    foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
-                        $defaultContent = $decodeDefaultMetaDatum['content'];
-                        $defaultKeyValue = $decodeDefaultMetaDatum['keyValue'];
-                        $defaultKeyType = $decodeDefaultMetaDatum['keyType'];
-
-                        $contentAsGetter = 'get' . ucfirst($defaultContent);
-                        if (method_exists($object, $contentAsGetter)) {
-                            $defaultContent = $object->$contentAsGetter();
-                        }
-
-                        $this->headMeta->__invoke($defaultContent, $defaultKeyValue, $defaultKeyType, []);
-                    }
-                }
-
-                foreach ($metadata as $metadatum) {
-                    $content = $metadatum['content'];
-                    $keyValue = $metadatum['keyValue'];
-                    $keyType = $metadatum['keyType'];
-
-                    $this->headMeta->__invoke($content, $keyValue, $keyType, []);
-                }
+                $this->headMeta->__invoke($content, $keyValue, $keyType, []);
             }
         }
     }
