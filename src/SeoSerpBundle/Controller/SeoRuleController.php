@@ -59,9 +59,13 @@ class SeoRuleController extends AbstractController
 
         $seoRule = new SeoRule();
         $seoRule->setName($request->get('name'));
-        $seoRule->save();
+        try {
+            $seoRule->save();
 
-        return $this->json(['success' => true, 'id' => $seoRule->getId()]);
+            return $this->json(['success' => true, 'id' => $seoRule->getId()]);
+        } catch (\Exception $exception) {
+            return $this->json(['success' => false, 'message' => $exception->getMessage()]);
+        }
     }
 
     /**
