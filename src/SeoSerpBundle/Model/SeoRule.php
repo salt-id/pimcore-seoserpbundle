@@ -36,6 +36,9 @@ class SeoRule extends AbstractModel
     /** @var boolean */
     public $active;
 
+    /** @var string $title */
+    public $title;
+
     /** @var string $metadata */
     public $metadata;
 
@@ -179,7 +182,23 @@ class SeoRule extends AbstractModel
     }
 
     /**
-     * @return mixed
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string
      */
     public function getMetadata()
     {
@@ -187,7 +206,7 @@ class SeoRule extends AbstractModel
     }
 
     /**
-     * @param mixed $metadata
+     * @param string $metadata
      */
     public function setMetadata($metadata)
     {

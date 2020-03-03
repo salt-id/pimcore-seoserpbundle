@@ -104,6 +104,16 @@ class DocumentMetaDataListener implements EventSubscriberInterface
 
             $seoRuleDefaultMetaData = $getSeoRule->getMetadata();
 
+            if ($getSeoRule->getTitle()) {
+
+                $document->setTitle(null);
+
+                $defaultTitleGetter = 'get' . ucfirst($getSeoRule->getTitle());
+                if (method_exists($object, $defaultTitleGetter)) {
+                    $this->headTitle->set($object->$defaultTitleGetter());
+                }
+            }
+
             $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
 
             if ($decodeDefaultMetaData) {

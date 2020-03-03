@@ -213,6 +213,13 @@ saltid.seoserp.seo.rule.item = Class.create({
                     xtype: "checkbox",
                     checked: this.data.active
                 },
+                {
+                    xtype: "textfield",
+                    name: "title",
+                    fieldLabel: t("title"),
+                    width: 350,
+                    value: this.data.title,
+                },
                 this.metaDataPanel
             ]
         });

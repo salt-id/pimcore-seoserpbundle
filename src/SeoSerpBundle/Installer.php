@@ -71,11 +71,9 @@ class Installer extends MigrationInstaller
         $table->addColumn('id', 'integer', [
             'autoincrement' => true,
         ]);
-
         $table->addColumn('name', 'string', [
             'default' => ''
         ]);
-
         $table->addColumn('routeName', 'string', [
             'notnull' => false
         ]);
@@ -88,11 +86,15 @@ class Installer extends MigrationInstaller
         $table->addColumn('classField', 'string', [
             'notnull' => false
         ]);
-
         $table->addColumn('active', 'smallint', [
             'default' => 1,
             'notnull' => false
         ]);
+
+        $table->addColumn('title', 'string', [
+            'notnull' => false
+        ]);
+
         $table->addColumn('metadata', 'text', [
             'notnull' => false
         ]);
