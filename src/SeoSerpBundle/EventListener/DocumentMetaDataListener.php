@@ -85,7 +85,7 @@ class DocumentMetaDataListener implements EventSubscriberInterface
         $routeName = $request->get('_route');
         $getSeoRule = SeoRule::getByRouteName($routeName);
 
-        if ($getSeoRule && $getSeoRule->getActive()) {
+        if ($getSeoRule && ($getSeoRule ? $getSeoRule->getActive() : false)) {
             $getRouteVariable = $getSeoRule->getRouteVariable();
             $getClassName = 'Pimcore\\Model\\DataObject\\' . $getSeoRule->getClassName();
             $getClassField = 'getBy' . ucfirst($getSeoRule->getClassField());
@@ -116,6 +116,22 @@ class DocumentMetaDataListener implements EventSubscriberInterface
 
             $decodeDefaultMetaData = json_decode($seoRuleDefaultMetaData, true);
 
+            $seo = Seo::getByObjectId($objectId);
+            $isShouldSkipSeo = !(bool)$seo;
+            $seoData = $seo ? $seo->getData() : '';
+            $decodeSeoData = json_decode($seoData, true);
+            $seoMetaData = !$isShouldSkipSeo ? $this->extractSeo($decodeSeoData) : [];
+            $seoMetaDataKeyValue = $this->extractSeoKeyValue($seoMetaData);
+
+            if ($seoMetaDataKeyValue) {
+                $seoRuleMetaDataKeyValue = $this->extractSeoKeyValue($decodeDefaultMetaData);
+                $decodeDefaultMetaData = $this->cleansingDuplicateKeyValue(
+                    $seoRuleMetaDataKeyValue,
+                    $seoMetaDataKeyValue,
+                    $decodeDefaultMetaData
+                );
+            }
+
             if ($decodeDefaultMetaData) {
                 foreach ($decodeDefaultMetaData as $decodeDefaultMetaDatum) {
                     $defaultContent = $decodeDefaultMetaDatum['content'];
@@ -137,31 +153,23 @@ class DocumentMetaDataListener implements EventSubscriberInterface
                 }
             }
 
-            $seo = Seo::getByObjectId($objectId);
-            if (!$seo) {
+            if ($isShouldSkipSeo) {
                 return;
             }
 
-            $seoData = $seo->getData();
-            if (!is_json($seoData)) {
-                return;
+            if ($seoTitle = $decodeSeoData['seoTitle']) {
+                $this->headTitle->set($seoTitle);
             }
 
-            $decodeSeoData = json_decode($seoData, true);
-            $metadata = $decodeSeoData['metadata'] ?? null;
-
-            if ($decodeSeoData['seoTitle']) {
-                $this->headTitle->set($decodeSeoData['seoTitle']);
+            if ($seoDesc = $decodeSeoData['seoDescription']) {
+                $this->headMeta->setDescription($seoDesc);
             }
 
-            if ($decodeSeoData['seoDescription']) {
-                $this->headMeta->setDescription($decodeSeoData['seoDescription']);
-            }
+            $metadata = $decodeSeoData['metadata'] ?? [];
 
             if (!$metadata) {
                 return;
             }
-
             foreach ($metadata as $metadatum) {
                 $content = $metadatum['content'];
                 $keyValue = $metadatum['keyValue'];
@@ -170,5 +178,38 @@ class DocumentMetaDataListener implements EventSubscriberInterface
                 $this->headMeta->__invoke($content, $keyValue, $keyType, []);
             }
         }
+    }
+
+    private function extractSeo(array $decodeSeoData)
+    {
+        return $decodeSeoData['metadata'] ?? [];
+    }
+
+    private function extractSeoKeyValue(array $seoMetaData): array
+    {
+        $keyValue = [];
+
+        if (!$seoMetaData) {
+            return $keyValue;
+        }
+
+        foreach ($seoMetaData as $seoMetaDatum) {
+            $keyValue[] = $seoMetaDatum['keyValue'] ?? null;
+        }
+
+        return $keyValue;
+    }
+
+    private function cleansingDuplicateKeyValue(array $seoRuleMetaDataKeyValue, array $seoMetaDataKeyValue, $decodeDefaultMetaData): array
+    {
+        $newDcodeDefaultMetaData = [];
+        foreach ($seoRuleMetaDataKeyValue as $key => $item) {
+            if (in_array($item, $seoMetaDataKeyValue, true)) {
+                continue;
+            }
+            $newDcodeDefaultMetaData[] = $decodeDefaultMetaData[$key];
+        }
+
+        return $newDcodeDefaultMetaData;
     }
 }
