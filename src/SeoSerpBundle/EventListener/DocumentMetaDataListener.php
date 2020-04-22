@@ -13,6 +13,7 @@ use Pimcore\Http\Request\Resolver\{
     DocumentResolver as DocumentResolverService,
     PimcoreContextResolver
 };
+use Pimcore\Model\Document;
 use SaltId\SeoSerpBundle\Helper\GeneralHelper;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -79,13 +80,13 @@ class DocumentMetaDataListener implements EventSubscriberInterface
             return;
         }
 
-        $document = $this->documentResolverService->getDocument($request);
+        $document = $this->documentResolverService->getDocument($request) ?? Document::getById(1);
 
         // do something magically to inject head meta tagging.
         $routeName = $request->get('_route');
         $getSeoRule = SeoRule::getByRouteName($routeName);
 
-        if ($getSeoRule && ($getSeoRule ? $getSeoRule->getActive() : false)) {
+        if ($document && $getSeoRule && ($getSeoRule ? $getSeoRule->getActive() : false)) {
             $getRouteVariable = $getSeoRule->getRouteVariable();
             $getClassName = 'Pimcore\\Model\\DataObject\\' . $getSeoRule->getClassName();
             $getClassField = 'getBy' . ucfirst($getSeoRule->getClassField());
