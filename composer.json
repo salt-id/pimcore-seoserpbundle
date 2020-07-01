@@ -11,7 +11,7 @@
     ],
     "require": {
         "pimcore/pimcore": "^5.4.0 | ^6.3.0",
-        "saltid/pimcore-extensionmanagerbundle": "^v1.0.0-beta-0.1"
+        "saltid/pimcore-extensionmanagerbundle": "~1.0@beta"
     },
     "autoload": {
         "psr-4": {
